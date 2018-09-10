@@ -1,0 +1,9 @@
+-format gmsh
+-file   grid.msh
+-type   ascii
+-renumber yes
+-gmsh   yes
+-npdir  3
+-x      101-102
+-y      201-202
+-z      301-302
