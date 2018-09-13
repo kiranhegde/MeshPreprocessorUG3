@@ -61,7 +61,7 @@ subroutine print0(message)
    character(len=*),intent(in) :: message
 
    if(rank == 0) then
-     print*
+     !print*
      print*,trim(message)
      !print*
    endif

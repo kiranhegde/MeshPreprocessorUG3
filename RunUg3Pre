@@ -1,0 +1,29 @@
+#!/bin/bash
+
+argu=$#
+
+if [ $argu -lt 2 ]
+then
+   echo "Input arguments missing..."
+   echo
+      echo  'Input argument format'
+      echo  
+      echo  'ug3pre No_of_partition  optional_write '
+      echo  
+      echo  'No_of_partition : no. of cpu cores or partions for parallel run > 0'
+      echo  'optional_write  : write_test_vtk' 
+      echo  '                  write_test_msh'
+      echo  '                  write_part_msh'
+      echo  '                  write_sparse_matrix'
+      echo  
+      echo  'Eg.  mpirun -np 5  ./ug3preF90 -c 6 -w write_test_vtk'
+      echo  
+   exit
+else
+   make  clean; make -f makefile ;
+   clear
+   mpirun -np 4  ./ug3preF90 -c $1 -w  $2
+fi
+
+
+echo $1 $2

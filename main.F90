@@ -193,10 +193,10 @@ contains
       print*,'ug3pre No_of_partition  optional_write '
       print*
       print*,'No_of_partition : no. of cpu cores or partions for parallel run > 0'
-      print*,'optional_write  : -write_test_vtk' 
-      print*,'                  -write_test_msh'
-      print*,'                  -write_part_msh'
-      print*,'                  -write_sparse_matrix'
+      print*,'optional_write  : write_test_vtk' 
+      print*,'                  write_test_msh'
+      print*,'                  write_part_msh'
+      print*,'                  write_sparse_matrix'
       print*   
       print*,'Eg.  mpirun -np 5  ./ug3preF90 -c 6 -w write_test_vtk'   
       print*   

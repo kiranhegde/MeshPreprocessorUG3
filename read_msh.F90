@@ -5,8 +5,33 @@ subroutine read_msh(g,xyz)
    use mgrid
    use mtsdata
    implicit none
-   integer(kind=i4) :: coun,tag(3),it,i 
-   integer(kind=i4) :: ptags(3*npdir) 
+   !
+   ! there are 19 gmsh element types: \
+   !
+   !    1 : 2-node line
+   !    2 : 3-node triangle (face)
+   !    3 : 4-node quadrangle (face)
+   !    4 : 4-node tetrahedron
+   !    5 : 8-node hexahedron (eg cube)
+   !    6 : 6-node triangular-prism
+   !    7 : 5-node pyramid
+   !
+   !  8-14: 'second-order' elements.  Ref Gmsh manual.
+   !   15 : 1-node point
+   ! 16-19: more second-order FEM elements
+   !
+   ! the nodes/vertices for each element are read into the
+   ! v array.
+   !
+   ! each element can have several tags.
+   ! the first tag gives the physical_group number.
+   ! all elements on the same boundary have the same physical_group number.
+   !
+   integer(kind=i4),parameter :: elem_type(19) = &
+                      (/ 2,3,4,4,8,6,5,3,6,9,10,27,18,14,1,8,20,15,13 /)
+   integer(kind=i4) :: tags(64), v(27)
+   integer(kind=i4) :: coun,tag(3),it,i,j 
+   integer(kind=i4) :: ptags(3*npdir),gmshtype, ntags 
    integer(kind=i4) :: ntri, nquad, ntet, npris, npyr, nhex,nn
    integer          :: ivs = 0,lens
    real(kind=dp)    :: start,finish 
@@ -116,6 +141,7 @@ subroutine read_msh(g,xyz)
    !
    ! read the elements from the .msh file 
    !
+   call print0('Reading Elements')
    read(IOmesh,*) c_input1
    call check_input_character(c_input1,'$Elements')
 
@@ -128,16 +154,22 @@ subroutine read_msh(g,xyz)
      allocate(g%elem(g%nelem))
    endif
 
-   do i=1,g%nelem
-     read(IOmesh,*) it, g%elem%gmshtype, g%ntags
+   do j=1,g%nelem
+     read(IOmesh,*) it, gmshtype, ntags
      if( ivs <= 21 )then
-       if( g%ntags /= 3 ) write(*,*) 'tag error n_tags /= 3:',it,g%ntags
+       string=itoa(it)//" "//itoa(ntags)
+       if( ntags /= 3 ) call print0('tag error n_tags /= 3:' //string)
      else
-       if( g%ntags /= 2 ) write(*,*) 'tag error n_tags /= 2:',it,g%ntags
+       string=itoa(it)//" "//itoa(ntags)
+       if( ntags /= 2 )call print0('tag error n_tags /= 2:' //string) 
      endif
-     !call check_element_type(gmshtype,element_type)
-     !call check_n_tags(ntags,tags)
+     call check_element_type(gmshtype,elem_type)
+     call check_n_tags(ntags,tags)
      backspace(IOmesh)
+
+     read(IOmesh,*) it, gmshtype,ntags,(tags(i),i=1,ntags),(v(i),i=1,elem_type(gmshtype))
+     g%elem(j)%ntags=ntags
+     g%elem(j)%gmshtype=gmshtype
  
    enddo 
 
@@ -157,6 +189,45 @@ subroutine check_input_character(c1,c2)
      endif
 
 end subroutine
+
+subroutine check_element_type(ielement_type,element_type)
+
+     implicit none
+     integer ielement_type
+     integer element_type(:)
+
+     if( ielement_type < 0 )then
+       write(*,*) 'error reading Gmsh file: element type must be positive'
+       write(*,*) 'element type = ',ielement_type
+       stop
+     endif
+
+     if( ielement_type > size(element_type) )then
+       write(*,*) 'error reading Gmsh file: unrecognised element type'
+       write(*,*) 'element type ',ielement_type
+       write(*,*) 'max recognised element type ',size(element_type)
+       stop
+     endif
+
+end subroutine
+
+subroutine check_n_tags(ntags,itags)
+
+     implicit none
+
+     integer ntags
+     integer itags(:)
+
+     if( ntags > size(itags) )then
+       write(*,*) 'error: The Gmsh file contains ',ntags,' tags per element'
+       write(*,*) 'Gmsh2ug3 is hard-wired for a maximum of ',size(itags),&
+                  'tags.  The dimension of this array needs to be increased.'
+       stop
+     endif
+
+end subroutine
+
+
 
 
 
