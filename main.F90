@@ -63,12 +63,11 @@ program main
       print*,'Number of processes: ', nproc
    endif
 
-   call read_input_parameters()
+   call read_input_parameters(ctx%xyz)
 
-   !print*,write_test_vtk
-   !print*,write_test_msh
-   !print*,write_part_msh
-   !print*,write_sparse_matrix
+!  read grid file in msh format
+   if(gridtype==1) call read_msh(ctx%g,ctx%xyz);  
+   !if(grid.gridtype==2) readsu2_time=grid.read_su2();   // read grid file in su2 format
 
    if(rank==0) then 
       call cpu_time(tend) 
@@ -117,7 +116,7 @@ subroutine  parse_cmdline(ctx)
     !call print0("No. of partitions = "//itoa(core))
   endif
 
-stop
+!stop
   call PetscOptionsGetString(PETSC_NULL_OPTIONS,PETSC_NULL_CHARACTER,&
                               '-w',arg,flag,ierr); CHKERRQ(ierr)
 
@@ -141,40 +140,40 @@ stop
 
    return
 
-  print*
-  print*
-  print*,'Reading parameters from commandline'
-  if ( command_argument_count()  == 0)  then 
-      core = 1
-  else
-       do i = 1, command_argument_count()
-          call get_command_argument(i, arg)
-          select case (arg)
-          case ('-write_test_vtk')
-             print '(2a)', arg
-             write_test_vtk = 1
-          case ('-write_test_msh')
-             print '(2a)',arg
-             write_test_msh = 1
-          case ('-write_part_msh')
-             print '(2a)',arg
-             write_part_msh = 1
-          case ('-write_sparse_matrix')
-             print '(2a)',arg
-             write_sparse_matrix = 1 
-          case default
-             if(is_numeric(arg)) then 
-                core = core
-             else           
-                print '(a,a,/)', ' Unrecognized command-line option: ', arg
-               call print_help()
-               stop
-             endif  
-          end select
-       end do
-  endif
-  print*
-  print*
+!  print*
+!  print*
+!  print*,'Reading parameters from commandline'
+!  if ( command_argument_count()  == 0)  then 
+!      core = 1
+!  else
+!       do i = 1, command_argument_count()
+!          call get_command_argument(i, arg)
+!          select case (arg)
+!          case ('-write_test_vtk')
+!             print '(2a)', arg
+!             write_test_vtk = 1
+!          case ('-write_test_msh')
+!             print '(2a)',arg
+!             write_test_msh = 1
+!          case ('-write_part_msh')
+!             print '(2a)',arg
+!             write_part_msh = 1
+!          case ('-write_sparse_matrix')
+!             print '(2a)',arg
+!             write_sparse_matrix = 1 
+!          case default
+!             if(is_numeric(arg)) then 
+!                core = core
+!             else           
+!                print '(a,a,/)', ' Unrecognized command-line option: ', arg
+!               call print_help()
+!               stop
+!             endif  
+!          end select
+!       end do
+!  endif
+!  print*
+!  print*
 
   ! Print the date and, optionally, the time
   !call date_and_time(DATE=date, TIME=time, ZONE=zone)

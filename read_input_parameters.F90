@@ -1,4 +1,4 @@
-subroutine read_input_parameters(ctx)
+subroutine read_input_parameters(xyz)
 #include <petsc/finclude/petscsys.h>
    use petscsys
    use comdata
@@ -11,11 +11,14 @@ subroutine read_input_parameters(ctx)
    integer          :: io,cc,key,i
    logical          :: file_exists
    character(len=64):: string,str1,str2
-   type(tsdata)       :: ctx
+   !type(tsdata)       :: ctx
+   type(periodic_dir) :: xyz
    PetscInt           :: nunused
 
    if(rank==0) then
+      print*
       print*,'Reading parameters from preproc.in'
+      print*
    endif
 
 
@@ -31,7 +34,7 @@ subroutine read_input_parameters(ctx)
    else
       call abort1('readparam: unknown grid format :'//string)
    endif
-
+   
    call PetscOptionsGetString(PETSC_NULL_OPTIONS,PETSC_NULL_CHARACTER,&
                               '-file',string,set,ierr); CHKERRQ(ierr)
    
@@ -46,9 +49,14 @@ subroutine read_input_parameters(ctx)
    cc=0
    call PetscOptionsGetint(PETSC_NULL_OPTIONS,PETSC_NULL_CHARACTER,&
                               '-npdir',cc,set,ierr); CHKERRQ(ierr)
+
+   call print0(" npdir   : "//itoa(cc))
+
    if(cc>0)  then 
-     allocate(ctx%xyz%slavetag(cc))
-     allocate(ctx%xyz%mastertag(cc))
+     allocate(xyz%slavetag(cc),stat=io)
+     allocate(xyz%mastertag(cc),stat=io)
+     if(io/=0) call print0("!!!!!!!!!!!!!!!ERROR: could not allocate xyz")  
+
      npdir = cc 
 
      string=""
@@ -59,9 +67,9 @@ subroutine read_input_parameters(ctx)
        i=i+1
        call split_string(trim(string), str1, str2,'-')
        call str2int(str1,cc,io)
-       ctx%xyz%slavetag(i)=cc
+       xyz%slavetag(i)=cc
        call str2int(str2,cc,io)
-       ctx%xyz%mastertag(i)=cc
+       xyz%mastertag(i)=cc
        call print0("X-direction periodic :"//string)  
      endif  
 
@@ -72,9 +80,9 @@ subroutine read_input_parameters(ctx)
        i=i+1
        call split_string(trim(string), str1, str2,'-')
        call str2int(str1,cc,io)
-       ctx%xyz%slavetag(i)=cc
+       xyz%slavetag(i)=cc
        call str2int(str2,cc,io)
-       ctx%xyz%mastertag(i)=cc
+       xyz%mastertag(i)=cc
        call print0("Y-direction periodic :"//string)  
      endif
  
@@ -85,9 +93,9 @@ subroutine read_input_parameters(ctx)
        i=i+1
        call split_string(trim(string), str1, str2,'-')
        call str2int(str1,cc,io)
-       ctx%xyz%slavetag(i)=cc
+       xyz%slavetag(i)=cc
        call str2int(str2,cc,io)
-       ctx%xyz%mastertag(i)=cc
+       xyz%mastertag(i)=cc
        call print0("Z-direction periodic :"//string)  
      endif
    endif
@@ -133,13 +141,13 @@ subroutine read_input_parameters(ctx)
    call PetscOptionsGetInt(PETSC_NULL_OPTIONS,PETSC_NULL_CHARACTER,&
                               '-walls',cc,set,ierr); CHKERRQ(ierr)
    if(cc>0)  then 
-     allocate(ctx%xyz%swtag(cc))
+     !allocate(xyz%swtag(cc))
      nsolid_walls=cc
      is_rans=1
 
      do i=1,cc
-       !ctx%xyz%swtag(i)=
-       ctx%xyz%swtag  =1
+       !xyz%swtag(i)=
+       xyz%swtag  =1
      enddo 
        call print0("Number of solid walls (for RANS) = "//itoa(cc))  
 

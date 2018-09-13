@@ -2,9 +2,19 @@ module mgrid
    use dtype
    implicit none
 
+   type vertex
+      real(kind=dp) :: x,y,z 
+   end type vertex
+        
+   type elements
+      integer(kind=i4) :: gmshtype,ntags 
+      !real(kind=dp)    :: x,y,z 
+   end type elements
+
+
    type grid
-      !integer(kind=i4) :: nv,nc,nelem,nbf,nf,ne,np,no_pf,no_npf
-      !integer(kind=i4) :: ntri, nquad, ntet, npris, npyr, nhex
+      integer(kind=i4) :: nv,nc,nelem,nbf,nf,ne,np,no_pf,no_npf
+      integer(kind=i4) :: ntri, nquad, ntet, npris, npyr, nhex
       !integer(kind=i4) :: gridtype=1, is_periodic=0, renumber_flag=0,ofile_fmt=1
       !integer(kind=i4) :: npdir=0, msh_periodic=0, npt, is_rans=0, nsolid_walls
       integer(kind=i4) :: mesup, mpsup
@@ -13,7 +23,9 @@ module mgrid
       integer(kind=i4),dimension(:),allocatable :: esup1, esup2
       integer(kind=i4),dimension(:),allocatable :: psup1, psup2
       integer(kind=i4),dimension(:),allocatable :: pid, otn
-      real(kind=dp),dimension(:),allocatable :: volume
+      real(kind=dp),dimension(:),allocatable    :: volume
+      type(vertex),dimension(:),allocatable     :: vrt
+      type(elements),dimension(:),allocatable     :: elem
    end type grid
 
    type periodic_dir

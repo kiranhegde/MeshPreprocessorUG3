@@ -60,6 +60,11 @@ subroutine print0(message)
    implicit none
    character(len=*),intent(in) :: message
 
-   if(rank == 0) print*,trim(message)
+   if(rank == 0) then
+     print*
+     print*,trim(message)
+     !print*
+   endif
+
 
 end subroutine print0
